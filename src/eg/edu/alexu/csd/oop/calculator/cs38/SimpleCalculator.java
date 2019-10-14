@@ -1,12 +1,27 @@
 package eg.edu.alexu.csd.oop.calculator.cs38;
 import java.util.regex.*;
+import java.util.*;
 
 public class SimpleCalculator implements Calculator {
 
 	@Override
 	public void input(String s) {
-		// TODO Auto-generated method stub
-
+		
+		Scanner sc = new Scanner(System.in);
+		s=sc.nextLine();
+		String number1 ="\\d+\\.\\d+|\\d+";
+		String symbols = "[+/*-]";
+		Pattern num1 = Pattern.compile(number1);
+		Pattern sym = Pattern.compile(symbols);
+		Matcher m1 = num1.matcher(s);
+		Matcher mS = sym.matcher(s);
+		while (m1.find()) {
+			System.out.print(m1.group());
+			if(mS.find()) {
+				System.out.print(mS.group());
+			}	
+		}
+				
 	}
 
 	@Override
@@ -46,8 +61,13 @@ public class SimpleCalculator implements Calculator {
 	}
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
+		while(true){
+			
+			String IP= "";
+			SimpleCalculator calc = new SimpleCalculator();
+			calc.input(IP);
+			
+		}
 	}
 
 }
