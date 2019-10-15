@@ -4,7 +4,23 @@ import java.util.*;
 
 public class SimpleCalculator implements Calculator {
 	
-	String memory [][] = new String [6][4];
+	public static String memory [][] = new String [6][4];
+	public static int current = 0;
+	
+	public static void addOne() {
+		if (current == 5) {
+			current =0;
+		}else {
+			current++;
+		}
+	}
+	public static void removeOne() {
+		if (current == 0) {
+			current =5;
+		}else {
+			current--;
+		}
+	}
 	
 	@Override
 	public void input(String s) {
@@ -17,10 +33,10 @@ public class SimpleCalculator implements Calculator {
 		Matcher mS = sym.matcher(s);
 		int i = 0;
 		while (m1.find()) {
-			memory[0][i]= m1.group();
+			memory[current][i]= m1.group();
 			i++;
 			if(mS.find()) {
-				memory[0][i] = (mS.group());
+				memory[current][i] = (mS.group());
 				i++;
 			}	
 		}
@@ -29,50 +45,53 @@ public class SimpleCalculator implements Calculator {
 
 	@Override
 	public String getResult() {
-		double n1=Double.valueOf(memory[0][0]);
-		double n2=Double.valueOf(memory[0][2]);
-		if(memory[0][1].equals("+")) {
-			memory[0][3]=String.valueOf(n1+n2);
+		double n1=Double.valueOf(memory[current][0]);
+		double n2=Double.valueOf(memory[current][2]);
+		String r="";
+		if(memory[current][1].equals("+")) {
+			memory[current][3]=String.valueOf(n1+n2);
 		}
-		else if(memory[0][1].equals("-")) {
-			memory[0][3]=String.valueOf(n1-n2);
+		else if(memory[current][1].equals("-")) {
+			memory[current][3]=String.valueOf(n1-n2);
 		}
-		else if(memory[0][1].equals("*")) {
-			memory[0][3]=String.valueOf(n1*n2);
+		else if(memory[current][1].equals("*")) {
+			memory[current][3]=String.valueOf(n1*n2);
 		}
-		else if(memory[0][1].equals("/")) {
-			if(Double.valueOf(memory[0][2])==0) {
-				memory[0][3]="MATH ERROR";
+		else if(memory[current][1].equals("/")) {
+			if(Double.valueOf(memory[current][2])==0) {
+				memory[current][3]="MATH ERROR";
 			}
 			else{
-				memory[0][3]=String.valueOf(n1/n2);
+				memory[current][3]=String.valueOf(n1/n2);
 			}
 		}
-		if(Double.valueOf(memory[0][3])%1 == 0 && Double.valueOf(memory[0][2]) != 0.0) {
-			Matcher m = Pattern.compile("\\d+").matcher(memory[0][3]);
+		if(Double.valueOf(memory[current][3])%1 == 0 && Double.valueOf(memory[current][2]) != 0.0) {
+			Matcher m = Pattern.compile("\\d+").matcher(memory[current][3]);
 			m.find();
-			memory[0][3]=m.group();
+			memory[current][3]=m.group();
 		}
-		String r=memory[0][0] + memory[0][1] + memory[0][2] + "=" + memory[0][3];
+		r=memory[current][0] + memory[current][1] + memory[current][2] + "=" + memory[current][3];
 		return r;
 	}
 
 	@Override
 	public String current() {
-		// TODO Auto-generated method stub
-		return null;
+		removeOne();
+		
+		return memory[current][0] + memory[current][1] + memory[current][2] + "=" + memory[current][3] ;
 	}
 
 	@Override
 	public String prev() {
-		// TODO Auto-generated method stub
-		return null;
+		removeOne();
+		removeOne();
+		return memory[current][0] + memory[current][1] + memory[current][2] + "=" + memory[current][3];
 	}
 
 	@Override
 	public String next() {
-		// TODO Auto-generated method stub
-		return null;
+		addOne();
+		return memory[current][0] + memory[current][1] + memory[current][2] + "=" + memory[current][3];
 	}
 
 	@Override
@@ -98,6 +117,7 @@ public class SimpleCalculator implements Calculator {
 			String result = calc.getResult();
 			System.out.println(result);
 			System.out.println("");
+			addOne();
 			
 		}
 	}
