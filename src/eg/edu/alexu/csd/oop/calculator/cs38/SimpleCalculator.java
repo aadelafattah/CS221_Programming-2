@@ -30,6 +30,7 @@ public class SimpleCalculator implements Calculator {
 	@Override
 	public void input(String s) {
 		
+		String temp[][]=new String[1][4];
 		error=1;
 		
 		if(s.equals("prev") || s.equals("PREV")){
@@ -53,7 +54,6 @@ public class SimpleCalculator implements Calculator {
 			error=0;
 		}
 		else {
-			String temp[][]=new String[1][4];
 			String number1 ="\\d+\\.\\d+|\\d+|-\\d+\\.\\d+|-\\d+";
 			String symbols = "[+/*-]";
 			Pattern num1 = Pattern.compile(number1);
@@ -67,9 +67,8 @@ public class SimpleCalculator implements Calculator {
 				double t = 0;
 				t= Double.valueOf(String.valueOf(temp[0][i]));
 				temp[0][i]= String.valueOf(t);
-				Matcher neg1 = Pattern.compile("-").matcher(temp[0][i]);
-				Matcher neg2 = Pattern.compile("-").matcher(temp[0][i]);
-				if(neg1.find() && N==0) {
+				Matcher neg = Pattern.compile("-").matcher(temp[0][i]);
+				if(neg.find()) {
 					mS.find();
 				}
 				i++;
@@ -77,14 +76,9 @@ public class SimpleCalculator implements Calculator {
 				if(mS.find()) {
 					if(N==1) {
 						temp[0][i] = (mS.group());
-						if(temp[0][i].equals("-")) {
-							mS.replaceFirst("");
-						}
+						s=s.substring(0, mS.start())+s.substring(mS.start()+1);
 						i++;
 						error=0;
-					}
-					else if(N==2 && neg2.find()) {
-						break;
 					}
 					else {
 						error=1;
@@ -92,6 +86,7 @@ public class SimpleCalculator implements Calculator {
 					}
 				}
 			}
+		}
 			if(error==0) {
 				arrangeMemory();
 				current[0][0]=String.valueOf(temp[0][0]);
@@ -99,13 +94,18 @@ public class SimpleCalculator implements Calculator {
 				current[0][2]=String.valueOf(temp[0][2]);
 				current[0][3]=String.valueOf(temp[0][3]);
 			}
-		}		
-	}
+		}
 
 	@Override
 	public String getResult() {
 		double n1=Double.valueOf(current[0][0]);
 		double n2=Double.valueOf(current[0][2]);
+		if(n1%1==0) {
+			current[0][0]=String.valueOf((int)n1);
+		}
+		if(n2%1==0) {
+			current[0][2]=String.valueOf((int)n2);
+		}
 		String r="";
 		if(current[0][1].equals("+")) {
 			current[0][3]=String.valueOf(n1+n2);
@@ -119,12 +119,13 @@ public class SimpleCalculator implements Calculator {
 		else if(current[0][1].equals("/")) {
 			if(Double.valueOf(current[0][2])==0) {
 				current[0][3]="MATH ERROR";
+				return current[0][3];
 			}
 			else{
 				current[0][3]=String.valueOf(n1/n2);
 			}
 		}
-		if(Double.valueOf(current[0][3])%1 == 0 && Double.valueOf(current[0][2]) != 0.0) {
+		if(Double.valueOf(current[0][3])%1 == 0) {
 			Matcher m = Pattern.compile("\\d+").matcher(current[0][3]);
 			m.find();
 			current[0][3]=m.group();
