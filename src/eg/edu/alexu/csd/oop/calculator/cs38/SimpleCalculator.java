@@ -54,7 +54,7 @@ public class SimpleCalculator implements Calculator {
 		}
 		else {
 			String temp[][]=new String[1][4];
-			String number1 ="\\d+\\.\\d+|\\d+";
+			String number1 ="\\d+\\.\\d+|\\d+|-\\d+\\.\\d+|-\\d+";
 			String symbols = "[+/*-]";
 			Pattern num1 = Pattern.compile(number1);
 			Pattern sym = Pattern.compile(symbols);
@@ -64,13 +64,27 @@ public class SimpleCalculator implements Calculator {
 			N=0;
 			while (m1.find()) {
 				temp[0][i]= m1.group();
+				double t = 0;
+				t= Double.valueOf(String.valueOf(temp[0][i]));
+				temp[0][i]= String.valueOf(t);
+				Matcher neg1 = Pattern.compile("-").matcher(temp[0][i]);
+				Matcher neg2 = Pattern.compile("-").matcher(temp[0][i]);
+				if(neg1.find() && N==0) {
+					mS.find();
+				}
 				i++;
 				N++;
 				if(mS.find()) {
 					if(N==1) {
 						temp[0][i] = (mS.group());
+						if(temp[0][i].equals("-")) {
+							mS.replaceFirst("");
+						}
 						i++;
 						error=0;
+					}
+					else if(N==2 && neg2.find()) {
+						break;
 					}
 					else {
 						error=1;
@@ -237,7 +251,6 @@ public class SimpleCalculator implements Calculator {
 				System.out.println(result);
 			}
 			System.out.println("");
-			sc.close();
 		}
 	}
 
