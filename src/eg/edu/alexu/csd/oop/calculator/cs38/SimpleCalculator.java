@@ -2,7 +2,6 @@ package eg.edu.alexu.csd.oop.calculator.cs38;
 import java.util.regex.*;
 import java.io.*;
 import java.util.*;
-import java.lang.*;
 
 public class SimpleCalculator implements Calculator {
 	
@@ -276,6 +275,7 @@ public class SimpleCalculator implements Calculator {
 		while(true){
 			
 			String IP= "";
+			@SuppressWarnings("resource")
 			Scanner sc = new Scanner(System.in);
 			System.out.println("prev, next, current, save, load");
 			IP=sc.nextLine();
