@@ -12,6 +12,7 @@ public class SimpleCalculator implements Calculator {
 	public static int error = 0;
 	public static int N=0;
 	public static String result=null;
+	public static int PREV,NEX = 0;
 	
 	public void arrangeMemory() {
 		now=0;
@@ -76,7 +77,10 @@ public class SimpleCalculator implements Calculator {
 				if(mS.find()) {
 					if(N==1) {
 						temp[0][i] = (mS.group());
-						s=s.substring(0, mS.start())+s.substring(mS.start()+1);
+						s=s.substring(mS.start()+1);
+						if(temp[0][1].equals("-")) {
+							m1=num1.matcher(s);
+						}
 						i++;
 						error=0;
 					}
@@ -86,7 +90,6 @@ public class SimpleCalculator implements Calculator {
 					}
 				}
 			}
-		}
 			if(error==0) {
 				arrangeMemory();
 				current[0][0]=String.valueOf(temp[0][0]);
@@ -95,16 +98,24 @@ public class SimpleCalculator implements Calculator {
 				current[0][3]=String.valueOf(temp[0][3]);
 			}
 		}
+	}
 
 	@Override
 	public String getResult() {
+		if(error==1 || N < 2) {
+			return "ERROR";
+		}
 		double n1=Double.valueOf(current[0][0]);
 		double n2=Double.valueOf(current[0][2]);
 		if(n1%1==0) {
-			current[0][0]=String.valueOf((int)n1);
+			Matcher m = Pattern.compile("-\\d+|\\d+").matcher(String.valueOf(current[0][0]));
+			m.find();
+			current[0][0]=String.valueOf(m.group());
 		}
 		if(n2%1==0) {
-			current[0][2]=String.valueOf((int)n2);
+			Matcher m = Pattern.compile("-\\d+|\\d+").matcher(String.valueOf(current[0][2]));
+			m.find();
+			current[0][2]=String.valueOf(m.group());
 		}
 		String r="";
 		if(current[0][1].equals("+")) {
@@ -126,22 +137,34 @@ public class SimpleCalculator implements Calculator {
 			}
 		}
 		if(Double.valueOf(current[0][3])%1 == 0) {
-			Matcher m = Pattern.compile("\\d+").matcher(current[0][3]);
+			Matcher m = Pattern.compile("\\d+|-\\d+").matcher(current[0][3]);
 			m.find();
 			current[0][3]=m.group();
 		}
-		r=current[0][0] + current[0][1] + current[0][2] + "=" + current[0][3];
+		r=current[0][3];
 		return r;
 	}
 
 	@Override
 	public String current() {
+		if(String.valueOf(current[0][3]).equals("null")) {
+			return "ERROR: No Current";
+		}
 		return current[0][0] + current[0][1] + current[0][2] + "=" + current[0][3] ;
 	}
 
 	@Override
 	public String prev() {
-		if(now==4) {
+		PREV=1;
+		if(NEX==1) {
+			NEX=0;
+			now++;
+			now++;
+		}
+		if(now==-1) {
+			now++;
+		}
+		if(now==5 || String.valueOf(memory[now][3]).equals("null")) {
 			return "ERROR: No Prev";
 		}
 		else {
@@ -156,7 +179,16 @@ public class SimpleCalculator implements Calculator {
 
 	@Override
 	public String next() {
-		if(now==0) {
+		NEX=1;
+		if(PREV==1) {
+			PREV=0;
+			now--;
+			now--;
+		}
+		if(now==5) {
+			now--;
+		}
+		if(now==-1 || String.valueOf(memory[now][3]).equals("null")) {
 			return "ERROR: No Next";
 		}
 		else {
@@ -191,39 +223,47 @@ public class SimpleCalculator implements Calculator {
 	@Override
 	public void load() {
 		Scanner loadInfo = null;
+		int iLoad = 0;
 		try {
 			loadInfo= new Scanner(new File("SaveInfo.txt"));
 		}catch(Exception e){
 			error=1;
 		}
 		String temp = loadInfo.nextLine();
-		String number1 ="\\d+\\.\\d+|\\d+";
+		String number1 ="\\d+\\.\\d+|\\d+|-\\d+\\.\\d+|-\\d+";
 		String symbols = "[+/*-]";
 		Pattern num1 = Pattern.compile(number1);
 		Pattern sym = Pattern.compile(symbols);
 		Matcher m1 = num1.matcher(temp);
-		Matcher mS = sym.matcher(temp);
-		int i = 0;
+		Matcher mS = sym.matcher(temp); 
 		while (m1.find()) {
-			current[0][i]= m1.group();
-			i++;
-			if(mS.find()) {
-				current[0][i] = (mS.group());
-				i++;
+			current[0][iLoad]= m1.group();
+			iLoad++;
+			if(mS.find() && iLoad<3) {
+				current[0][iLoad] = (mS.group());
+				iLoad++;
 			}
 		}
-		for(int j=0; j<5;j++) {
+		for(int jLoad=0; jLoad<5;jLoad++) {
 			temp=loadInfo.nextLine();
 			m1 = num1.matcher(temp);
 			mS = sym.matcher(temp);
 			int k=0;
 			while (m1.find()) {
-				memory[j][k]= m1.group();
+				memory[jLoad][k]= m1.group();
 				k++;
-				if(mS.find()) {
-					memory[j][k] = (mS.group());
+				if(mS.find()&& k<3) {
+					memory[jLoad][k] = (mS.group());
 					k++;
 				}
+			}
+		}
+		if(String.valueOf(current[0][3]).equals("null")) {
+			current[0][3]="MATH ERROR";
+		}
+		for(int er=0;er<5;er++) {
+			if(String.valueOf(memory[er][3]).equals("null")) {
+				memory[er][3]="MATH ERROR";
 			}
 		}
 		loadInfo.close();
@@ -241,17 +281,8 @@ public class SimpleCalculator implements Calculator {
 			IP=sc.nextLine();
 			SimpleCalculator calc = new SimpleCalculator();
 			calc.input(IP);
-			if(error==1 || N < 2) {
-				System.out.println("ERROR");
-				continue;
-			}
-			if(IP.equals("save")||IP.equals("SAVE")||IP.equals("load")||IP.equals("LOAD")) {
-				System.out.println(result);
-			}else {
-				result = calc.getResult();
-				System.out.println(result);
-			}
-			System.out.println("");
+			result = calc.getResult();
+			System.out.println(result);
 		}
 	}
 
